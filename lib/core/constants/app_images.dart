@@ -34,4 +34,6 @@ class AppImages {
   static const AssetImage rooster = AssetImage("assets/images/rooster.png");
   static const AssetImage apple = AssetImage("assets/images/apple.png");
   static const AssetImage bana = AssetImage("assets/images/bana.png");
+  static const AssetImage cocoyam = AssetImage("assets/images/cocoyam.png");
+  static const AssetImage plantain = AssetImage("assets/images/plantain.png");
 }

@@ -2,9 +2,11 @@ import 'package:agricstock/core/constants/app_colors.dart';
 import 'package:agricstock/core/constants/app_images.dart';
 import 'package:agricstock/firebase_options.dart';
 import 'package:agricstock/providers/language_provider.dart';
+import 'package:agricstock/screens/anony_screen.dart';
 import 'package:agricstock/screens/chat_screen.dart';
 import 'package:agricstock/screens/market_price_screen.dart';
 import 'package:agricstock/screens/news_feed_screen.dart';
+import 'package:agricstock/screens/splash_screen.dart';
 import 'package:agricstock/screens/weather_screen.dart';
 import 'package:agricstock/shared/widgets/custom_navigation_item.dart';
 import 'package:agricstock/util/extension/translate_extension.dart';
@@ -38,7 +40,8 @@ class MyApp extends StatelessWidget {
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
               useMaterial3: true,
             ),
-            home: const AgriStock(),
+            // home: AnonymousSignInScreen(),
+            home: const SplashScreen(),
           );
         });
   }
@@ -75,6 +78,19 @@ class _AgriStockState extends ConsumerState<AgriStock> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        // centerTitle: true,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/playstore.png',
+              height: 40.h,
+            ),
+            Text(
+              "AgriStock",
+              style: TextStyle(fontSize: 20.sp),
+            ),
+          ],
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {

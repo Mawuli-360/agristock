@@ -31,20 +31,20 @@ class _MarketPriceScreenState extends ConsumerState<MarketPriceScreen>
   final List<FeatureProduct> products = [
     FeatureProduct(
         title: "Fresh Corn",
-        newPrice: "GHC 2.99",
-        oldPrice: "GHC 3.49",
+        newPrice: "GHC 200.99",
+        oldPrice: "GHC 160.49",
         rate: "+4.5",
         image: AppImages.corn),
     FeatureProduct(
         title: "Ripe Apple",
-        newPrice: "GHC 1.99",
-        oldPrice: "GHC 2.49",
+        newPrice: "GHC 9.99",
+        oldPrice: "GHC 6.49",
         rate: "+4.2",
         image: AppImages.apple),
     FeatureProduct(
         title: "Fresh Banana",
-        newPrice: "GHC 3.49",
-        oldPrice: "GHC 3.99",
+        newPrice: "GHC 5.00",
+        oldPrice: "GHC 4.00",
         rate: "+4.7",
         image: AppImages.bana)
   ];

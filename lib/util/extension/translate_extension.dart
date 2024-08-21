@@ -6,11 +6,6 @@ import 'package:translator/translator.dart';
 extension TranslateString on String {
   static final supportedLanguages = {
     'en': 'English',
-    // 'es': 'Spanish',
-    // 'fr': 'French',
-    // 'de': 'German',
-    // 'it': 'Italian',
-    // 'ee': 'Ewe',
     'ak': 'Twi',
   };
 

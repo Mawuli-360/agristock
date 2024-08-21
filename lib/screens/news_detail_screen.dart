@@ -1,4 +1,3 @@
-import 'package:agricstock/core/constants/app_colors.dart';
 import 'package:agricstock/providers/language_provider.dart';
 import 'package:agricstock/shared/domain/news.dart';
 import 'package:agricstock/shared/widgets/custom_text.dart';

@@ -1,0 +1,14 @@
+# flutter_launcher_icons.yaml
+dev_mode:
+  enable: false
+
+flutter_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/images/playstore.png"
+  image_path_ios: "assets/images/appstore.png"
+
+icon_android: true
+
+icon_ios: true

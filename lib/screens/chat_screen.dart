@@ -1,21 +1,25 @@
 import 'dart:io';
 
 import 'package:agricstock/core/constants/app_colors.dart';
+import 'package:agricstock/providers/language_provider.dart';
+import 'package:agricstock/util/extension/translate_extension.dart';
+import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class ChatScreen extends StatefulWidget {
+class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends ConsumerState<ChatScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _messageController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -34,45 +38,59 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final targetLanguage = ref.watch(currentLanguage);
     return Scaffold(
-      appBar: AppBar(title: const Text('Forum Chat')),
-      body: Column(
-        children: [
-          Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: _firestore
-                  .collection('messages')
-                  .orderBy('timestamp')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return const CircularProgressIndicator();
-                return ListView.builder(
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    DocumentSnapshot document = snapshot.data!.docs[index];
-                    bool isCurrentUser = document['userId'] == _currentUser.uid;
-                    return GestureDetector(
-                      onLongPressStart: (LongPressStartDetails details) =>
-                          _showMessageOptions(
-                              context, document, details.globalPosition),
-                      child: Align(
-                        alignment: isCurrentUser
-                            ? Alignment.centerRight
-                            : Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: isCurrentUser
-                                ? Colors.blue[100]
-                                : Colors.grey[300],
-                            borderRadius: BorderRadius.circular(15),
-                          ),
+      body: Container(
+        decoration: const BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(
+                  'assets/images/wallpaper.jpg',
+                ),
+                fit: BoxFit.cover)),
+        child: Column(
+          children: [
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _firestore
+                    .collection('messages')
+                    .orderBy('timestamp')
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const CircularProgressIndicator();
+                  }
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    padding: EdgeInsets.symmetric(horizontal: 10.h),
+                    itemBuilder: (context, index) {
+                      DocumentSnapshot document = snapshot.data!.docs[index];
+                      bool isCurrentUser =
+                          document['userId'] == _currentUser.uid;
+                      return GestureDetector(
+                        onLongPressStart: (LongPressStartDetails details) =>
+                            _showMessageOptions(
+                                context, document, details.globalPosition),
+                        child: Bubble(
+                          margin: const BubbleEdges.only(top: 10),
+                          alignment: isCurrentUser
+                              ? Alignment.topRight
+                              : Alignment.topLeft,
+                          nip: isCurrentUser
+                              ? BubbleNip.rightTop
+                              : BubbleNip.leftTop,
+                          color: isCurrentUser
+                              ? const Color.fromARGB(255, 225, 255, 199)
+                              : Colors.white,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(document['text']),
+                              document['text'].toString().translate(
+                                    targetLanguage,
+                                    color: isCurrentUser
+                                        ? Colors.black
+                                        : Colors.black,
+                                    fontSize: 16,
+                                  ),
                               if (document['imageUrl'] != null &&
                                   document['imageUrl'] != '')
                                 Image.network(
@@ -87,99 +105,99 @@ class _ChatScreenState extends State<ChatScreen> {
                                   padding: const EdgeInsets.all(5),
                                   margin: const EdgeInsets.only(top: 5),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey[200],
+                                    color: const Color.fromARGB(53, 20, 96, 3),
                                     borderRadius: BorderRadius.circular(5),
                                   ),
-                                  child: Text(
-                                      'Replying to: ${document['replyTo']}'),
+                                  child: 'Replying to: ${document['replyTo']}'
+                                      .translate(targetLanguage, fontSize: 16),
                                 ),
                             ],
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              },
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-          if (_replyingTo != null)
+            if (_replyingTo != null)
+              Container(
+                padding: const EdgeInsets.all(8),
+                color: Colors.grey[200],
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Replying to:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(_replyingTo!['text']),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () {
+                        setState(() {
+                          _replyingTo = null;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
             Container(
-              padding: const EdgeInsets.all(8),
-              color: Colors.grey[200],
+              // color: Colors.red,
+              margin: EdgeInsets.only(left: 6.h),
               child: Row(
                 children: [
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Replying to:',
-                          style: TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(_replyingTo!['text']),
-                      ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                          color: AppColors.backgroundColor,
+                          borderRadius: BorderRadius.circular(
+                            30.h,
+                          )),
+                      child: TextField(
+                        controller: _messageController,
+                        maxLines: 3,
+                        minLines: 1,
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(left: 12.h),
+                            hintText: 'Enter message',
+                            border: InputBorder.none),
+                      ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
+                  IconButton.filledTonal(
+                    color: Colors.white,
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                            Color.fromARGB(137, 6, 95, 70))),
+                    icon: const Icon(Icons.send),
                     onPressed: () {
-                      setState(() {
-                        _replyingTo = null;
-                      });
+                      if (_messageController.text.isEmpty) {
+                        return;
+                      }
+                      _sendMessage();
                     },
+                  ),
+                  IconButton.filledTonal(
+                    color: Colors.white,
+                    style: const ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(
+                            Color.fromARGB(137, 6, 95, 70))),
+                    icon: const Icon(Icons.image),
+                    onPressed: _uploadImage,
                   ),
                 ],
               ),
             ),
-          Container(
-            // color: Colors.red,
-            margin: EdgeInsets.only(left: 6.h),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: AppColors.backgroundColor,
-                        borderRadius: BorderRadius.circular(
-                          30.h,
-                        )),
-                    child: TextField(
-                      controller: _messageController,
-                      maxLines: 3,
-                      minLines: 1,
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(left: 12.h),
-                          hintText: 'Enter message',
-                          border: InputBorder.none),
-                    ),
-                  ),
-                ),
-                IconButton.filledTonal(
-                  color: Colors.white,
-                  style: const ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(
-                          Color.fromARGB(137, 6, 95, 70))),
-                  icon: const Icon(Icons.send),
-                  onPressed: () {
-                    if (_messageController.text.isEmpty) {
-                      return;
-                    }
-                    _sendMessage;
-                  },
-                ),
-                IconButton.filledTonal(
-                  color: Colors.white,
-                  style: const ButtonStyle(
-                      backgroundColor: WidgetStatePropertyAll(
-                          Color.fromARGB(137, 6, 95, 70))),
-                  icon: const Icon(Icons.image),
-                  onPressed: _uploadImage,
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

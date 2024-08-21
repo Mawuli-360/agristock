@@ -1,16 +1,50 @@
+import 'dart:async';
+
 import 'package:agricstock/core/constants/app_colors.dart';
 import 'package:agricstock/core/constants/app_images.dart';
 import 'package:agricstock/shared/widgets/custom_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 
-class WeatherDashboard extends StatelessWidget {
+class WeatherDashboard extends ConsumerStatefulWidget {
   const WeatherDashboard({
     super.key,
     required this.dailyWeather,
   });
 
   final List<Map<String, dynamic>> dailyWeather;
+
+  @override
+  ConsumerState<WeatherDashboard> createState() => _WeatherDashboardState();
+}
+
+class _WeatherDashboardState extends ConsumerState<WeatherDashboard> {
+  late Timer _timer;
+  late String _lastUpdated;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateTime();
+    // Set up a timer to update every hour
+    _timer = Timer.periodic(const Duration(hours: 1), (timer) {
+      _updateTime();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  void _updateTime() {
+    setState(() {
+      _lastUpdated = DateFormat('HH:mm').format(DateTime.now());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +81,7 @@ class WeatherDashboard extends StatelessWidget {
                               Positioned(
                                 top: 7.h,
                                 child: const CustomText(
-                                  body: "Thursday",
+                                  body: "Wednesday",
                                   fontSize: 18,
                                   color: AppColors.whiteColor,
                                 ),
@@ -69,12 +103,13 @@ class WeatherDashboard extends StatelessWidget {
                                   color: AppColors.whiteColor,
                                 ),
                               ),
-                              const Align(
+                              Align(
                                 alignment: Alignment.bottomLeft,
                                 child: CustomText(
-                                  body: "Last updated 11:45",
+                                  body: "Last updated $_lastUpdated",
                                   fontSize: 14,
-                                  color: Color.fromARGB(195, 230, 230, 230),
+                                  color:
+                                      const Color.fromARGB(195, 230, 230, 230),
                                 ),
                               ),
                             ],
@@ -116,7 +151,7 @@ class WeatherDashboard extends StatelessWidget {
             height: 60.h,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: dailyWeather.map((elememt) {
+              children: widget.dailyWeather.map((elememt) {
                 return Column(
                   children: [
                     CustomText(
@@ -147,7 +182,7 @@ class WeatherDashboard extends StatelessWidget {
                     size: 26.h,
                   ),
                   const CustomText(
-                    body: "Eastern, Ghana",
+                    body: "Koforidua",
                     fontSize: 14,
                     color: AppColors.whiteColor,
                   ),

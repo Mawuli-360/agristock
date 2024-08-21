@@ -32,7 +32,7 @@ class FeaturedCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SizedBox(
-            width: 160.w,
+            width: 120.w,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
